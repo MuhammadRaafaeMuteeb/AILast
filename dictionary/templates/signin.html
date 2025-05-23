@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Signin{% endblock %}
+{% block content %}
+    <h2>Login to Your Account</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {{ form.username.errors }}
+        <input type="text" name="username" placeholder="Username" value="{{ form.username.value|default:'' }}">
+
+        {{ form.password.errors }}
+        <input type="password" name="password" placeholder="Password">
+
+        <button type="submit">Signin</button>
+    </form>
+    <a href="{% url 'signup' %}">Don't have an account? Signup</a>
+{% endblock %}

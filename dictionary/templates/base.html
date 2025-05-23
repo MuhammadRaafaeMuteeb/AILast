@@ -1,0 +1,17 @@
+<!-- dictionary/templates/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}AI Tools{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'dictionary/styles.css' %}">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="logo">🛠️ AI Tools</div>
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h1>🔧 Admin Tool Analytics</h1>
+
+    <h2>🖱️ Top Clicked Tools</h2>
+    <table border="1">
+        <tr><th>Tool</th><th>Clicks</th></tr>
+        {% for tool in top_clicked_tools %}
+        <tr><td>{{ tool.name }}</td><td>{{ tool.click_count }}</td></tr>
+        {% endfor %}
+    </table>
+
+    <h2>🔍 Most Searched Queries</h2>
+    <table border="1">
+        <tr><th>Query</th><th>Search Count</th></tr>
+        {% for item in top_search_queries %}
+        <tr><td>{{ item.query }}</td><td>{{ item.count }}</td></tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

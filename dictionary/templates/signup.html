@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Signup{% endblock %}
+{% block content %}
+    <h2>Create Account</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {{ form.username.errors }}
+        <input type="text" name="username" placeholder="Username" value="{{ form.username.value|default:'' }}">
+
+        {{ form.email.errors }}
+        <input type="email" name="email" placeholder="Email" value="{{ form.email.value|default:'' }}">
+
+        {{ form.password1.errors }}
+        <input type="password" name="password1" placeholder="Password">
+
+        {{ form.password2.errors }}
+        <input type="password" name="password2" placeholder="Confirm Password">
+
+        <button type="submit">Signup</button>
+    </form>
+    <a href="{% url 'signin' %}">Already have an account? Sign in</a>
+{% endblock %}

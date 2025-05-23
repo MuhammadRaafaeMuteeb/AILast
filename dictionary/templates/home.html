@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+    <h2>Welcome, {{ request.user.username }}!</h2>
+    <div style="display: flex; flex-direction: column; gap: 12px; margin: 20px 0;">
+        <a href="{% url 'profile' %}"><button>👤 Profile</button></a>
+        <a href="{% url 'view_tools' %}"><button>🔍 View Tools</button></a>
+        <a href="{% url 'submit_tool' %}"><button>➕ Submit Tool</button></a>
+    </div>
+    <a href="{% url 'signout' %}"><button style="background-color: #ff4757;">Logout</button></a>
+{% endblock %}

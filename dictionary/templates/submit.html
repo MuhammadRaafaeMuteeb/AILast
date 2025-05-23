@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Submit Tool{% endblock %}
+{% block content %}
+    <h2>➕ Submit a New Tool</h2>
+    <form method="post" style="display: flex; flex-direction: column; gap: 16px;">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+    
+        {{ form.name.errors }}
+        <input type="text" name="name" placeholder="Tool Name" value="{{ form.name.value|default:'' }}">
+    
+        {{ form.link.errors }}
+        <input type="url" name="link" placeholder="Tool URL" value="{{ form.link.value|default:'' }}">
+    
+        {{ form.description.errors }}
+        <textarea name="description" placeholder="Tool Description" rows="4" style="resize: none; padding: 10px;">{{ form.description.value|default:'' }}</textarea>
+    
+        {{ form.developer.errors }}
+        <input type="text" name="developer" placeholder="Developer Name" value="{{ form.developer.value|default:'' }}">
+    
+        {{ form.category.errors }}
+        <select name="category">
+            {% for value, label in form.fields.category.choices %}
+                <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    
+        <button type="submit">Submit Tool</button>
+    </form>    
+    <a href="{% url 'home' %}">⬅ Back to Dashboard</a>
+{% endblock %}

@@ -1,0 +1,223 @@
+/* styles.css */
+
+body {
+    background-image: url('/static/images/bg.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.tool-grid {
+    margin-top: 80px;
+}
+
+.page-wrapper {
+    padding: 30px;
+}
+
+.container {
+    background-color: rgba(255, 255, 255, 0.25); /* translucent white */
+    padding: 40px 30px;
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #f0f0f0; /* light text for contrast */
+}
+
+h2, .logo {
+    color: #f7f7f7; /* bright but soft white */
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.7); /* subtle shadow for clarity */
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+}
+
+form input, textarea {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #222; /* dark text inside inputs */
+    border: 1px solid #ccc;
+    padding: 10px 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    outline: none;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+form input:focus, textarea:focus {
+    border-color: #6495ED; /* cornflower blue focus border */
+    outline: none;
+}
+
+button {
+    background-color: #6495ED; /* cornflower blue button */
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+button:hover {
+    background-color: #4169E1; /* royal blue on hover */
+}
+
+a {
+    color: #a0c8ff; /* soft blue links */
+    text-decoration: none;
+    display: block;
+    margin-top: 16px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #d0e4ff;
+}
+
+.errorlist {
+    color: #ff6b6b; /* warm red errors */
+    font-size: 14px;
+    list-style: none;
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.tool-card {
+    background-color: rgba(255, 255, 255, 0.88);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+}
+
+.tool-card img {
+    width: 100%;
+    max-height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.tool-card h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #2f3542;
+}
+
+.tool-card p {
+    font-size: 14px;
+    color: #57606f;
+    margin-bottom: 12px;
+}
+
+.tool-card a {
+    display: inline-block;
+    padding: 8px 14px;
+    background-color: #3742fa;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.search-bar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 30px;
+    margin-top: 20px;
+}
+
+.search-bar input {
+    padding: 10px 14px;
+    font-size: 16px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+}
+
+.search-bar button {
+    background-color: #3742fa;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.search-bar button:hover {
+    background-color: #2f3542;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+}
+
+.pagination {
+    list-style: none;
+    display: flex;
+    gap: 8px;
+    padding: 0;
+}
+
+.pagination li {
+    display: inline-block;
+}
+
+.pagination a,
+.pagination span {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: #e0e0e0;
+    color: #2f3542;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.pagination a:hover {
+    background-color: #3742fa;
+    color: #ffffff;
+}
+
+.pagination .active span {
+    background-color: #3742fa;
+    color: white;
+    font-weight: bold;
+}

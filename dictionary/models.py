@@ -1,0 +1,37 @@
+from django.db import models
+from django.contrib.auth.models import User
+from django.contrib import admin
+import openpyxl
+from django.http import HttpResponse
+
+class Tool(models.Model):
+    name = models.CharField(max_length=255)
+    link = models.URLField(max_length=500)
+    image_url = models.URLField(max_length=500, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    tags = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)
+    click_count = models.PositiveIntegerField(default=0)
+    views = models.PositiveIntegerField(default=0)
+    developer = models.CharField(max_length=255, blank=True, null=True)
+    submitted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    CATEGORY_CHOICES = [
+        ('AI Writing', 'AI Writing'),
+        ('Code Tools', 'Code Tools'),
+        ('Image Generation', 'Image Generation'),
+        ('Productivity', 'Productivity'),
+        ('Marketing', 'Marketing'),
+        ('Other', 'Other'),
+    ]
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Other')
+    
+    def __str__(self):
+        return self.name
+    
+class SearchQuery(models.Model):
+    query = models.CharField(max_length=255)
+    searched_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.query

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}View AI Tools{% endblock %}
+
+{% block content %}
+<h2>Explore AI Tools</h2>
+
+<form method="GET" action="{% url 'view_tools' %}" class="filter-bar">
+    <input type="text" name="search" placeholder="Search tools..." value="{{ search }}">
+
+    <button type="submit">🔍 Search</button>
+</form>
+
+<div class="tool-grid">
+    {% for tool in page_obj %}
+        <div class="tool-card">
+            <img src="{{ tool.image_url }}" alt="{{ tool.name }}">
+            <h3>{{ tool.name }}</h3>
+            <p>{{ tool.description|truncatewords:20 }}</p>
+            <a href="{% url 'track_click' tool.id %}" target="_blank">Visit Tool</a>
+        </div>
+    {% empty %}
+        <p>No tools available yet.</p>
+    {% endfor %}
+</div>
+<div class="pagination-container">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li><a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}page=1">&laquo;</a></li>
+            <li><a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}page={{ page_obj.previous_page_number }}">&lsaquo;</a></li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <li class="active"><span>{{ num }}</span></li>
+            {% elif num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                <li><a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li><a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}page={{ page_obj.next_page_number }}">&rsaquo;</a></li>
+            <li><a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}page={{ page_obj.paginator.num_pages }}">&raquo;</a></li>
+        {% endif %}
+    </ul>
+</div>
+{% endblock %}
