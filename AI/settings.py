@@ -132,7 +132,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ALLOWED_HOSTS = ['http://localhost:3000']
+ALLOWED_HOSTS = ['http://localhost:3000', 'https://ailast-production.up.railway.app']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://ailast-production.up.railway.app'
