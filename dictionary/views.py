@@ -196,7 +196,69 @@ def admin_dashboard(request):
 
 
 
-
+@api_view(['GET'])
+def search_tools_api(request):
+    """
+    Search tools by name
+    Parameters:
+    - q: search query (required)
+    - category: filter by category (optional)
+    - limit: limit results (optional, default: 20)
+    """
+    search_query = request.GET.get('q', '').strip()
+    category = request.GET.get('category', '').strip()
+    limit = request.GET.get('limit', '20')
+    
+    # Validate search query
+    if not search_query:
+        return Response({
+            'error': 'Search query is required',
+            'message': 'Please provide a search query using the "q" parameter'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        limit = int(limit)
+        if limit <= 0 or limit > 100:  # Limit between 1 and 100
+            limit = 20
+    except ValueError:
+        limit = 20
+    
+    # Build the query
+    tools = Tool.objects.filter(is_approved=True)
+    
+    # Search by name (case-insensitive)
+    tools = tools.filter(name__icontains=search_query)
+    
+    # Filter by category if provided
+    if category:
+        tools = tools.filter(category__iexact=category)
+    
+    # Order by relevance (exact matches first, then by click count)
+    tools = tools.extra(
+        select={
+            'exact_match': "CASE WHEN LOWER(name) = LOWER(%s) THEN 1 ELSE 0 END"
+        },
+        select_params=[search_query]
+    ).order_by('-exact_match', '-click_count', 'name')
+    
+    # Apply limit
+    tools = tools[:limit]
+    
+    # Track search query for analytics
+    try:
+        SearchQuery.objects.create(query=search_query)
+    except:
+        pass  # Don't fail the API if search tracking fails
+    
+    # Serialize and return results
+    serializer = ToolSerializer(tools, many=True)
+    
+    return Response({
+        'query': search_query,
+        'category': category if category else None,
+        'total_results': len(serializer.data),
+        'results': serializer.data
+    }, status=status.HTTP_200_OK)
 
 
 
