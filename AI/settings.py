@@ -117,6 +117,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
+    "https://aitoolscover.com",
+    "https://aitoolscover.vercel.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     # Add your production frontend URL when you deploy
