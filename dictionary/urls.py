@@ -26,4 +26,5 @@ urlpatterns = [
 
     path('api/tools/', views.list_tools_api, name='api-list-tools'),
     path('api/tools/submit/', views.submit_tool_api, name='api-submit-tool'),
+    path('api/tools/search/', views.search_tools_api, name='api-search-tools'),
 ]
