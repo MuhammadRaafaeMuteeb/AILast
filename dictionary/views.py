@@ -264,20 +264,20 @@ def search_suggestions_api(request):
     
     try:
         limit = int(limit)
-        if limit <= 0 or limit > 20: 
+        if limit <= 0 or limit > 20:
             limit = 10
     except ValueError:
         limit = 10
-    
-    suggestions = Tool.objects.filter(
+
+    tools = Tool.objects.filter(
         is_approved=True,
         name__icontains=search_query
-    ).values_list('name', flat=True).distinct().order_by('name')[:limit]
+    ).order_by('name')[:limit]
     
-    return Response({
-        'query': search_query,
-        'suggestions': list(suggestions)
-    }, status=status.HTTP_200_OK)
+    serializer = ToolSerializer(tools, many=True)
+    
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 
