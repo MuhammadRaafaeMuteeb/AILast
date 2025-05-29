@@ -271,7 +271,7 @@ def search_suggestions_api(request):
 
     tools = Tool.objects.filter(
         is_approved=True,
-        name__icontains=search_query
+        description__icontains=search_query
     ).order_by('name')[:limit]
     
     serializer = ToolSerializer(tools, many=True)
