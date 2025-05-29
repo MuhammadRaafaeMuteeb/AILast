@@ -4,6 +4,15 @@ from .import views
 from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
+    path('api/check-login/', views.check_login_status),
+    path('api/signup/', views.signup_api),
+    path('api/login/', obtain_auth_token),
+    path('api/logout/', views.logout_api),
+    path('api/tools/', views.list_tools_api, name='api-list-tools'),
+    path('api/tools/submit/', views.submit_tool_api, name='api-submit-tool'),
+    path('api/tools/search/', views.search_tools_api, name='api-search-tools'),
+    path('api/tools/suggestions/', views.search_suggestions_api, name='api-search-suggestions'),
+    
     path('', index_view, name='index'),
     path('signup/', signup_view, name='signup'),
     path('signin/', signin_view, name='signin'),
@@ -16,16 +25,5 @@ urlpatterns = [
     path('upload-cleaned-csv/', views.upload_cleaned_csv, name='upload_cleaned_csv'),
     path('click/<int:tool_id>/', views.track_click, name='track_click'),
     path('export-tools-csv/', export_tools_csv, name='export_tools_csv'),
-    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
-
-
-
-
-    path('api/login/', obtain_auth_token),
-
-
-    path('api/tools/', views.list_tools_api, name='api-list-tools'),
-    path('api/tools/submit/', views.submit_tool_api, name='api-submit-tool'),
-    path('api/tools/search/', views.search_tools_api, name='api-search-tools'),
-    path('api/tools/suggestions/', views.search_suggestions_api, name='api-search-suggestions')
+    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard')
 ]

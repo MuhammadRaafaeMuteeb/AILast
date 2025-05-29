@@ -1,6 +1,7 @@
+from django.db import IntegrityError
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, logout
-from .forms import SignupForm, SigninForm, Tool, MultipleCSVUploadForm
+from django.contrib.auth import login, logout
+from .forms import SignupForm, SigninForm, Tool
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from .forms import ToolForm
@@ -16,10 +17,15 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
 from .models import Tool, SearchQuery
-from .serializers import ToolSerializer, SearchQuerySerializer
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from .serializers import ToolSerializer
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
+
+
+from django.contrib.auth.models import User
+from django.db import IntegrityError
+
 
 def track_click(request, tool_id):
     tool = get_object_or_404(Tool, id=tool_id)
@@ -194,6 +200,31 @@ def admin_dashboard(request):
     })
 
 
+@api_view(['POST'])
+def signup_api(request):
+    username = request.data.get('username', '').strip()
+    password = request.data.get('password', '').strip()
+    email = request.data.get('email', '').strip()
+    if not username or not password or not email:
+        return Response({
+            'error': 'All fields are required',
+            'message': 'Please provide username, password, and email'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        user = User.objects.create_user(username=username, password=password, email=email)
+        return Response({
+            'message': 'User created successfully',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
+        }, status=status.HTTP_201_CREATED)
+    except IntegrityError:
+        return Response({
+            'error': 'Username already exists',
+            'message': 'Please choose a different username'
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -242,44 +273,27 @@ def search_tools_api(request):
         'results': serializer.data
     }, status=status.HTTP_200_OK)
 
-
-
-
 @api_view(['GET'])
 def search_suggestions_api(request):
-    """
-    Get search suggestions based on existing tool names
-    Parameters:
-    - q: partial search query (required)
-    - limit: limit results (optional, default: 10)
-    """
     search_query = request.GET.get('q', '').strip()
     limit = request.GET.get('limit', '10')
-    
     if not search_query:
         return Response({
             'error': 'Search query is required',
             'message': 'Please provide a search query using the "q" parameter'
         }, status=status.HTTP_400_BAD_REQUEST)
-    
     try:
         limit = int(limit)
         if limit <= 0 or limit > 20:
             limit = 10
     except ValueError:
         limit = 10
-
     tools = Tool.objects.filter(
         is_approved=True,
         description__icontains=search_query
     ).order_by('tags')[:limit]
-    
     serializer = ToolSerializer(tools, many=True)
-    
     return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-
 
 @api_view(['GET'])
 def list_tools_api(request):
@@ -296,3 +310,25 @@ def submit_tool_api(request):
         tool = serializer.save(submitted_by=request.user)
         return Response({'message': 'Tool submitted successfully'}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def check_login_status(request):
+    return Response({
+        'is_logged_in': True,
+        'user': {
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email,
+        }
+    })
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def logout_api(request):
+    request.user.auth_token.delete()
+    return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
