@@ -303,20 +303,20 @@ def search_by_category_api(request):
 def similar_tools_search_limit(request):
     tag = request.GET.get('tag', '').strip()
 
-    if not category:
+    if not tag:
         return Response({
-            'error': 'Category is required',
-            'message': 'Please provide a category using the "category" parameter'
+            'error': 'tag is required',
+            'message': 'Please provide a tag using the "tag" parameter'
         }, status=status.HTTP_400_BAD_REQUEST)
 
     tools = Tool.objects.filter(
         is_approved=True,
-        category__icontains=category
+        category__icontains=tag
     ).order_by('-click_count', 'name')[:5]  # ✅ Limit to 5 tools
 
     serializer = ToolSerializer(tools, many=True)
     return Response({
-        'category': category,
+        'category': tag,
         'total_results': len(serializer.data),
         'results': serializer.data
     }, status=status.HTTP_200_OK)
