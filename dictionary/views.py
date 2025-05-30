@@ -312,7 +312,7 @@ def similar_tools_search_limit(request):
     tools = Tool.objects.filter(
         is_approved=True,
         category__icontains=tag
-    ).order_by('-click_count', 'name')[:5]  # ✅ Limit to 5 tools
+    ).order_by('-click_count', 'name')[:4]  # ✅ Limit to 5 tools
 
     serializer = ToolSerializer(tools, many=True)
     return Response({
