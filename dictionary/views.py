@@ -288,7 +288,8 @@ def search_by_category_api(request):
 
     tools = Tool.objects.filter(
         is_approved=True,
-        category__iexact=category
+        category__icontains=category
+
     ).order_by('-click_count', 'name')
 
     serializer = ToolSerializer(tools, many=True)
