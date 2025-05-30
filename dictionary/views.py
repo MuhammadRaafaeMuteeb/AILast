@@ -350,6 +350,18 @@ def list_tools_api(request):
     serializer = ToolSerializer(tools, many=True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def list_tools_pagination_api(request):
+    # Get limit and offset from query params or use defaults
+    limit = int(request.GET.get('limit', 18))
+    offset = int(request.GET.get('offset', 0))
+
+    # Filter approved tools and apply pagination
+    tools = Tool.objects.filter(is_approved=True)[offset:offset+limit]
+    serializer = ToolSerializer(tools, many=True)
+
+    return Response(serializer.data)
+
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
