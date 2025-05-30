@@ -9,11 +9,13 @@ urlpatterns = [
     path('api/login/', obtain_auth_token),
     path('api/logout/', views.logout_api),
     path('api/tools/', views.list_tools_api, name='api-list-tools'),
+    path('api/tools/pagination', views.list_tools_pagination_api, name='api-list-tools'),
     path('api/tools/submit/', views.submit_tool_api, name='api-submit-tool'),
     path('api/tools/search/', views.search_tools_api, name='api-search-tools'),
     path('api/tools/suggestions/', views.search_suggestions_api, name='api-search-suggestions'),
     path('api/tools/category/', views.search_by_category_api, name='search-by-category'),
     path('api/tools/similar/', views.similar_tools_search_limit, name="similar-tools-search-limit"),
+    
 
     path('', index_view, name='index'),
     path('signup/', signup_view, name='signup'),
