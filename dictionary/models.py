@@ -17,13 +17,24 @@ class Tool(models.Model):
     developer = models.CharField(max_length=255, blank=True, null=True)
     submitted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     CATEGORY_CHOICES = [
-        ('AI Writing', 'AI Writing'),
-        ('Code Tools', 'Code Tools'),
-        ('Image Generation', 'Image Generation'),
-        ('Productivity', 'Productivity'),
-        ('Marketing', 'Marketing'),
-        ('Other', 'Other'),
+    ('Business & Productivity', 'Business & Productivity'),
+    ('Education & Knowledge', 'Education & Knowledge'),
+    ('Environmental', 'Environmental'),
+    ('Food & Nutrition', 'Food & Nutrition'),
+    ('Government & Public Sector', 'Government & Public Sector'),
+    ('Health & Wellness', 'Health & Wellness'),
+    ('Language & Communication', 'Language & Communication'),
+    ('Media & Entertainment', 'Media & Entertainment'),
+    ('NFT & Blockchain', 'NFT & Blockchain'),
+    ('Personal & Lifestyle', 'Personal & Lifestyle'),
+    ('Security & Privacy', 'Security & Privacy'),
+    ('Sports', 'Sports'),
+    ('Tech & Engineering', 'Tech & Engineering'),
+    ('Travel & Navigation', 'Travel & Navigation'),
+    ('Utilities & Tools', 'Utilities & Tools'),
+    ('Other', 'Other')
     ]
+
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Other')
     
     def __str__(self):

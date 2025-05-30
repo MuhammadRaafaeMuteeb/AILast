@@ -129,12 +129,13 @@ def upload_cleaned_csv(request):
 
             for row in reader:
                 print("Row:", row)
-                name = row.get('Tool Name', '').strip()
-                link = row.get('Link', '').strip()
-                description = row.get('Description', '').strip()
-                logo_url = row.get('Logo URL', '').strip() or default_logo  # <-- fallback here
+                name = row.get('name', '').strip()
+                link = row.get('link', '').strip()
+                description = row.get('description', '').strip()
+                logo_url = row.get('image_url', '').strip() or default_logo
+                category = row.get('category', '')
 
-                print(f"Parsed: name={name}, link={link}, description={description}, logo={logo_url}")
+                print(f"Parsed: name={name}, link={link}, description={description}, logo={logo_url}, Category ={category}")
 
                 try:
                     Tool.objects.create(
