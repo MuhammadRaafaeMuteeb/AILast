@@ -143,6 +143,7 @@ def upload_cleaned_csv(request):
                         link=link,
                         description=description,
                         image_url=logo_url,
+                        category = category,
                         is_approved=True
                     )
                     success_count += 1
@@ -274,6 +275,30 @@ def search_tools_api(request):
         'results': serializer.data
     }, status=status.HTTP_200_OK)
 
+
+@api_view(['GET'])
+def search_by_category_api(request):
+    category = request.GET.get('category', '').strip()
+
+    if not category:
+        return Response({
+            'error': 'Category is required',
+            'message': 'Please provide a category using the "category" parameter'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    tools = Tool.objects.filter(
+        is_approved=True,
+        category__iexact=category
+    ).order_by('-click_count', 'name')
+
+    serializer = ToolSerializer(tools, many=True)
+    return Response({
+        'category': category,
+        'total_results': len(serializer.data),
+        'results': serializer.data
+    }, status=status.HTTP_200_OK)
+
+
 @api_view(['GET'])
 def search_suggestions_api(request):
     search_query = request.GET.get('q', '').strip()
@@ -301,6 +326,7 @@ def list_tools_api(request):
     tools = Tool.objects.filter(is_approved=True)
     serializer = ToolSerializer(tools, many=True)
     return Response(serializer.data)
+
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])

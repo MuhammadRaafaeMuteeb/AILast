@@ -12,7 +12,8 @@ urlpatterns = [
     path('api/tools/submit/', views.submit_tool_api, name='api-submit-tool'),
     path('api/tools/search/', views.search_tools_api, name='api-search-tools'),
     path('api/tools/suggestions/', views.search_suggestions_api, name='api-search-suggestions'),
-    
+    path('api/tools/category/', views.search_by_category_api, name='search-by-category'),
+
     path('', index_view, name='index'),
     path('signup/', signup_view, name='signup'),
     path('signin/', signin_view, name='signin'),
