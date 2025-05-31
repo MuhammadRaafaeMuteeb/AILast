@@ -13,3 +13,4 @@ tzdata==2025.2
 whitenoise
 djangorestframework
 django-cors-headers
+PyJWT
