@@ -50,6 +50,7 @@ def google_login_api(request):
     try:
         # Get the Google credential token from request
         credential = request.data.get('credential')
+        print("Here is your credentials hell", credential)
         if not credential:
             return Response({
                 'error': 'Missing credential',
