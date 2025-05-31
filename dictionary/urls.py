@@ -15,6 +15,7 @@ urlpatterns = [
     path('api/tools/suggestions/', views.search_suggestions_api, name='api-search-suggestions'),
     path('api/tools/category/', views.search_by_category_api, name='search-by-category'),
     path('api/tools/similar/', views.similar_tools_search_limit, name="similar-tools-search-limit"),
+    path('api/google-login/', views.google_login_api, name='google_login_api'),
     
 
     path('', index_view, name='index'),
