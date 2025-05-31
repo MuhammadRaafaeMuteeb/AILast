@@ -7,15 +7,23 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 from pathlib import Path
+import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-fd&zd4$*)^%z32y+91a(3s_0e5b1+x_i#8b=(hk-yk8(pxty-0'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-# GOOGLE_CLIENT_ID = "1063377806790-fkgujlsl6egaatcdsr5ve6i6jt8ra3in.apps.googleusercontent.com"
+
+# Google OAuth Configuration
+GOOGLE_CLIENT_ID = "1063377806790-fkgujlsl6egaatcdsr5ve6i6jt8ra3in.apps.googleusercontent.com"
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -51,6 +59,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -104,28 +113,99 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Fixed ALLOWED_HOSTS (remove http:// prefix)
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ailast-production.up.railway.app']
-
-CSRF_TRUSTED_ORIGINS = [
-    'https://ailast-production.up.railway.app',
-    'http://localhost:3000',  # Add this for local development
-    'http://127.0.0.1:3000',
+# ALLOWED_HOSTS Configuration
+ALLOWED_HOSTS = [
+    'localhost', 
+    '127.0.0.1', 
+    'ailast-production.up.railway.app',
+    '.railway.app',  # Allow all Railway subdomains
 ]
 
+# CSRF Configuration
+CSRF_TRUSTED_ORIGINS = [
+    'https://ailast-production.up.railway.app',
+    'https://*.railway.app',  # Allow all Railway apps
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://localhost:3000',  # For HTTPS local development
+    'https://aitoolscover.com',
+    'https://aitoolscover.vercel.app',
+]
+
+# Static files configuration
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# CORS Configuration
+# CORS Configuration - FIXED
 CORS_ALLOWED_ORIGINS = [
     "https://aitoolscover.com",
     "https://aitoolscover.vercel.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    # Add your production frontend URL when you deploy
-    # "https://yourfrontenddomain.com",
+    "https://localhost:3000",  # For HTTPS local dev
 ]
 
-# Fallback for development - remove in production
-CORS_ALLOW_ALL_ORIGINS = DEBUG
-
+# Additional CORS settings for better compatibility
 CORS_ALLOW_CREDENTIALS = True
+
+# Allow specific headers
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# Allow specific methods
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# For development only - REMOVE IN PRODUCTION
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+    # Add logging to see what's happening
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'root': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'loggers': {
+            'corsheaders': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+        },
+    }
+
+# REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 18
+}
