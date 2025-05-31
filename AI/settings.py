@@ -142,6 +142,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://localhost:3000",  # For HTTPS local dev
+    "https://accounts.google.com"
 ]
 
 # Additional CORS settings for better compatibility
