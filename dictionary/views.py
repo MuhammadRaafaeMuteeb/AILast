@@ -27,6 +27,159 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 
 
+
+import jwt
+import requests
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from django.db import IntegrityError
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.conf import settings
+import json
+from datetime import datetime, timedelta
+
+@api_view(['POST'])
+def google_login_api(request):
+    """
+    Google OAuth login endpoint
+    Expects: { "credential": "google_jwt_token" }
+    Returns: { "token": "your_app_jwt_token", "user": {...} }
+    """
+    try:
+        # Get the Google credential token from request
+        credential = request.data.get('credential')
+        if not credential:
+            return Response({
+                'error': 'Missing credential',
+                'message': 'Google credential token is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verify the Google token by calling Google's tokeninfo endpoint
+        google_response = requests.get(
+            f'https://oauth2.googleapis.com/tokeninfo?id_token={credential}',
+            timeout=10
+        )
+        
+        if google_response.status_code != 200:
+            return Response({
+                'error': 'Invalid Google token',
+                'message': 'Failed to verify Google authentication'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Parse Google user data
+        google_data = google_response.json()
+        
+        # Verify the token is for your app
+        expected_client_id = getattr(settings, 'GOOGLE_CLIENT_ID', None)
+        if expected_client_id and google_data.get('aud') != expected_client_id:
+            return Response({
+                'error': 'Invalid client',
+                'message': 'Token was not issued for this application'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Extract user information
+        email = google_data.get('email')
+        name = google_data.get('name', '')
+        google_id = google_data.get('sub')
+        
+        if not email or not google_id:
+            return Response({
+                'error': 'Incomplete Google data',
+                'message': 'Could not retrieve email or user ID from Google'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if user exists by email
+        try:
+            user = User.objects.get(email=email)
+            # User exists, update Google ID if not set
+            if not hasattr(user, 'profile') or not getattr(user.profile, 'google_id', None):
+                # You might want to create a UserProfile model to store google_id
+                # For now, we'll just proceed with login
+                pass
+                
+        except User.DoesNotExist:
+            # Create new user
+            try:
+                # Generate username from email or name
+                base_username = email.split('@')[0]
+                username = base_username
+                counter = 1
+                
+                # Ensure username is unique
+                while User.objects.filter(username=username).exists():
+                    username = f"{base_username}{counter}"
+                    counter += 1
+                
+                # Create user with Google data
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    first_name=name.split(' ')[0] if name else '',
+                    last_name=' '.join(name.split(' ')[1:]) if name and len(name.split(' ')) > 1 else ''
+                )
+                
+                # You might want to create a UserProfile to store google_id
+                # UserProfile.objects.create(user=user, google_id=google_id)
+                
+            except IntegrityError as e:
+                return Response({
+                    'error': 'User creation failed',
+                    'message': 'Could not create user account'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Generate JWT token for your app (similar to your login endpoint)
+        token = generate_jwt_token(user)
+        
+        return Response({
+            'message': 'Google login successful',
+            'token': token,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name
+            }
+        }, status=status.HTTP_200_OK)
+
+    except requests.RequestException:
+        return Response({
+            'error': 'Google verification failed',
+            'message': 'Could not verify Google token'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    except Exception as e:
+        # Log the error in production
+        print(f"Google login error: {str(e)}")
+        return Response({
+            'error': 'Authentication failed',
+            'message': 'An error occurred during Google authentication'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def generate_jwt_token(user):
+    """
+    Generate JWT token for user - modify this to match your existing token generation
+    """
+    payload = {
+        'user_id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'exp': datetime.utcnow() + timedelta(days=7),  # Token expires in 7 days
+        'iat': datetime.utcnow()
+    }
+    
+    # Use your SECRET_KEY or a specific JWT secret
+    secret_key = getattr(settings, 'SECRET_KEY')
+    token = jwt.encode(payload, secret_key, algorithm='HS256')
+    
+    return token
+
+
+
+
 def track_click(request, tool_id):
     tool = get_object_or_404(Tool, id=tool_id)
     tool.click_count += 1
