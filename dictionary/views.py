@@ -18,7 +18,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.response import Response
 from .models import Tool, SearchQuery
 from .serializers import ToolSerializer
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 
@@ -33,7 +33,7 @@ import requests
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.db import IntegrityError
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
@@ -41,6 +41,7 @@ import json
 from datetime import datetime, timedelta
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def google_login_api(request):
     """
     Google OAuth login endpoint
