@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-fd&zd4$*)^%z32y+91a(3s_0e5b1+x_i#8b=(hk-yk8(pxty-0'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-GOOGLE_CLIENT_ID = "1063377806790-fkgujlsl6egaatcdsr5ve6i6jt8ra3in.apps.googleusercontent.com"
+# GOOGLE_CLIENT_ID = "1063377806790-fkgujlsl6egaatcdsr5ve6i6jt8ra3in.apps.googleusercontent.com"
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
