@@ -279,6 +279,8 @@ def search_tools_api(request):
 @api_view(['GET'])
 def search_by_category_api(request):
     category = request.GET.get('category', '').strip()
+    limit = int(request.GET.get('limit', 18))
+    offset = int(request.GET.get('offset', 0))
 
     if not category:
         return Response({
@@ -290,7 +292,7 @@ def search_by_category_api(request):
         is_approved=True,
         category__icontains=category
 
-    ).order_by('-click_count', 'name')
+    ).order_by('-click_count', 'name')[offset:offset+limit]
 
     serializer = ToolSerializer(tools, many=True)
     return Response({
