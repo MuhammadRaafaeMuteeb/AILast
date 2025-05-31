@@ -1,4 +1,4 @@
-﻿asgiref==3.8.1
+asgiref==3.8.1
 diff-match-patch==20241021
 Django==5.2.1
 django-import-export==4.3.7
@@ -14,3 +14,7 @@ whitenoise
 djangorestframework
 django-cors-headers
 PyJWT
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+requests
