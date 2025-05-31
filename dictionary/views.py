@@ -18,13 +18,16 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.response import Response
 from .models import Tool, SearchQuery
 from .serializers import ToolSerializer
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
-
+from .authentication import JWTAuthentication
 
 from django.contrib.auth.models import User
 from django.db import IntegrityError
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -33,7 +36,7 @@ import requests
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.db import IntegrityError
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
@@ -43,37 +46,33 @@ from datetime import datetime, timedelta
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def google_login_api(request):
-    """
-    Google OAuth login endpoint
-    Expects: { "credential": "google_jwt_token" }
-    Returns: { "token": "your_app_jwt_token", "user": {...} }
-    """
     try:
         # Get the Google credential token from request
         credential = request.data.get('credential')
-        print("Here is your credentials hell", credential)
+        logger.info(f"Received Google credential: {credential[:50] if credential else 'None'}...")
+        
         if not credential:
             return Response({
                 'error': 'Missing credential',
                 'message': 'Google credential token is required'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # Verify the Google token by calling Google's tokeninfo endpoint
+        # Verify the Google token
         google_response = requests.get(
             f'https://oauth2.googleapis.com/tokeninfo?id_token={credential}',
             timeout=10
         )
         
         if google_response.status_code != 200:
+            logger.error(f"Google token verification failed: {google_response.text}")
             return Response({
                 'error': 'Invalid Google token',
                 'message': 'Failed to verify Google authentication'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # Parse Google user data
         google_data = google_response.json()
         
-        # Verify the token is for your app
+        # Verify the client ID
         expected_client_id = getattr(settings, 'GOOGLE_CLIENT_ID', None)
         if expected_client_id and google_data.get('aud') != expected_client_id:
             return Response({
@@ -81,7 +80,7 @@ def google_login_api(request):
                 'message': 'Token was not issued for this application'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # Extract user information
+        # Extract user data
         email = google_data.get('email')
         name = google_data.get('name', '')
         google_id = google_data.get('sub')
@@ -92,46 +91,39 @@ def google_login_api(request):
                 'message': 'Could not retrieve email or user ID from Google'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if user exists by email
+        # Find or create user
         try:
             user = User.objects.get(email=email)
-            # User exists, update Google ID if not set
-            if not hasattr(user, 'profile') or not getattr(user.profile, 'google_id', None):
-                # You might want to create a UserProfile model to store google_id
-                # For now, we'll just proceed with login
-                pass
-                
+            logger.info(f"Found existing user: {user.username}")
         except User.DoesNotExist:
-            # Create new user
             try:
-                # Generate username from email or name
                 base_username = email.split('@')[0]
                 username = base_username
                 counter = 1
-                
-                # Ensure username is unique
                 while User.objects.filter(username=username).exists():
                     username = f"{base_username}{counter}"
                     counter += 1
                 
-                # Create user with Google data
+                name_parts = name.split(' ') if name else ['']
+                first_name = name_parts[0] if name_parts else ''
+                last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
+                
                 user = User.objects.create_user(
                     username=username,
                     email=email,
-                    first_name=name.split(' ')[0] if name else '',
-                    last_name=' '.join(name.split(' ')[1:]) if name and len(name.split(' ')) > 1 else ''
+                    first_name=first_name,
+                    last_name=last_name
                 )
-                
-                # You might want to create a UserProfile to store google_id
-                # UserProfile.objects.create(user=user, google_id=google_id)
+                logger.info(f"Created new user: {user.username}")
                 
             except IntegrityError as e:
+                logger.error(f"User creation failed: {str(e)}")
                 return Response({
                     'error': 'User creation failed',
                     'message': 'Could not create user account'
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # Generate JWT token for your app (similar to your login endpoint)
+        # Generate JWT token
         token = generate_jwt_token(user)
         
         return Response({
@@ -145,16 +137,9 @@ def google_login_api(request):
                 'last_name': user.last_name
             }
         }, status=status.HTTP_200_OK)
-
-    except requests.RequestException:
-        return Response({
-            'error': 'Google verification failed',
-            'message': 'Could not verify Google token'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+        
     except Exception as e:
-        # Log the error in production
-        print(f"Google login error: {str(e)}")
+        logger.error(f"Google login error: {str(e)}")
         return Response({
             'error': 'Authentication failed',
             'message': 'An error occurred during Google authentication'
@@ -162,18 +147,17 @@ def google_login_api(request):
 
 
 def generate_jwt_token(user):
-    """
-    Generate JWT token for user - modify this to match your existing token generation
-    """
+    from datetime import datetime, timedelta
+    import jwt
+    
     payload = {
         'user_id': user.id,
         'username': user.username,
         'email': user.email,
-        'exp': datetime.utcnow() + timedelta(days=7),  # Token expires in 7 days
+        'exp': datetime.utcnow() + timedelta(days=7),
         'iat': datetime.utcnow()
     }
     
-    # Use your SECRET_KEY or a specific JWT secret
     secret_key = getattr(settings, 'SECRET_KEY')
     token = jwt.encode(payload, secret_key, algorithm='HS256')
     
@@ -357,33 +341,6 @@ def admin_dashboard(request):
     })
 
 
-@api_view(['POST'])
-def signup_api(request):
-    username = request.data.get('username', '').strip()
-    password = request.data.get('password', '').strip()
-    email = request.data.get('email', '').strip()
-    if not username or not password or not email:
-        return Response({
-            'error': 'All fields are required',
-            'message': 'Please provide username, password, and email'
-        }, status=status.HTTP_400_BAD_REQUEST)
-    try:
-        user = User.objects.create_user(username=username, password=password, email=email)
-        return Response({
-            'message': 'User created successfully',
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email
-            }
-        }, status=status.HTTP_201_CREATED)
-    except IntegrityError:
-        return Response({
-            'error': 'Username already exists',
-            'message': 'Please choose a different username'
-        }, status=status.HTTP_400_BAD_REQUEST)
-
-
 @api_view(['GET'])
 def search_tools_api(request):
     """
@@ -519,11 +476,11 @@ def list_tools_pagination_api(request):
 
     return Response(serializer.data)
 
-
 @api_view(['POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticatedOrReadOnly])
+@authentication_classes([TokenAuthentication, JWTAuthentication])  # Support both auth methods
+@permission_classes([IsAuthenticated])
 def submit_tool_api(request):
+    logger.info(f"User {request.user.username} submitting tool")
     serializer = ToolSerializer(data=request.data)
     if serializer.is_valid():
         tool = serializer.save(submitted_by=request.user)
@@ -532,22 +489,62 @@ def submit_tool_api(request):
 
 
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication])
+@authentication_classes([TokenAuthentication, JWTAuthentication])  # Support both auth methods
 @permission_classes([IsAuthenticated])
 def check_login_status(request):
+    logger.info(f"Checking login status for user: {request.user.username}")
     return Response({
         'is_logged_in': True,
         'user': {
             'id': request.user.id,
             'username': request.user.username,
             'email': request.user.email,
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
         }
     })
 
 
+
 @api_view(['POST'])
-@authentication_classes([TokenAuthentication])
+@permission_classes([AllowAny])
+def signup_api(request):
+    username = request.data.get('username', '').strip()
+    password = request.data.get('password', '').strip()
+    email = request.data.get('email', '').strip()
+    
+    if not username or not password or not email:
+        return Response({
+            'error': 'All fields are required',
+            'message': 'Please provide username, password, and email'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.create_user(username=username, password=password, email=email)
+        return Response({
+            'message': 'User created successfully',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
+        }, status=status.HTTP_201_CREATED)
+    except IntegrityError:
+        return Response({
+            'error': 'Username already exists',
+            'message': 'Please choose a different username'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication, JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def logout_api(request):
-    request.user.auth_token.delete()
-    return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+    """
+    Logout API - for token-based auth, you might want to blacklist the token
+    For JWT, tokens are stateless, so this mainly serves as a confirmation
+    """
+    logger.info(f"User {request.user.username} logging out")
+    return Response({
+        'message': 'Logged out successfully'
+    }, status=status.HTTP_200_OK)
