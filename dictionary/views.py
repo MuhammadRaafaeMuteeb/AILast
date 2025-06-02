@@ -391,7 +391,7 @@ def search_tools_api(request):
 @api_view(['GET'])
 def search_by_category_api(request):
     category = request.GET.get('category', '').strip()
-    limit = int(request.GET.get('limit', 18))
+    limit = int(request.GET.get('limit', 20))
     offset = int(request.GET.get('offset', 0))
 
     if not category:
@@ -467,7 +467,7 @@ def list_tools_api(request):
 @api_view(['GET'])
 def list_tools_pagination_api(request):
     # Get limit and offset from query params or use defaults
-    limit = int(request.GET.get('limit', 18))
+    limit = int(request.GET.get('limit', 20))
     offset = int(request.GET.get('offset', 0))
 
     # Filter approved tools and apply pagination
