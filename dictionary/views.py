@@ -272,6 +272,7 @@ def upload_cleaned_csv(request):
                 link = row.get('link', '').strip()
                 description = row.get('description', '').strip()
                 logo_url = row.get('image_url', '').strip() or default_logo
+                thumbnail_url = row.get('thumbnail_url', '').strip() or default_logo
                 category = row.get('category', '')
 
                 print(f"Parsed: name={name}, link={link}, description={description}, logo={logo_url}, Category ={category}")
@@ -283,6 +284,7 @@ def upload_cleaned_csv(request):
                         description=description,
                         image_url=logo_url,
                         category = category,
+                        thumbnail_url=thumbnail_url,
                         is_approved=True
                     )
                     success_count += 1
