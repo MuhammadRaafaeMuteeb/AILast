@@ -550,3 +550,32 @@ def logout_api(request):
     return Response({
         'message': 'Logged out successfully'
     }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication, JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def user_submitted_tools_api(request):
+    logger.info(f"User {request.user.username} requesting their submitted tools")
+    tools = Tool.objects.filter(submitted_by=request.user).order_by('-created_at')
+    total_tools = tools.count()
+    approved_tools = tools.filter(is_approved=True).count()
+    pending_tools = tools.filter(is_approved=False).count()
+    serializer = ToolSerializer(tools, many=True)
+    formatted_tools = []
+    for tool in serializer.data:
+        formatted_tools.append({
+            'id': tool['id'],
+            'name': tool['name'],
+            'status': "Approved" if tool['is_approved'] else "Pending",
+            'submitted_date': tool['created_at'].split('T')[0] if 'created_at' in tool else None,
+            'is_approved': tool['is_approved']
+        })
+    return Response({
+        'stats': {
+            'total_tools': total_tools,
+            'approved_tools': approved_tools,
+            'pending_tools': pending_tools,
+        },
+        'tools': formatted_tools
+    }, status=status.HTTP_200_OK)
