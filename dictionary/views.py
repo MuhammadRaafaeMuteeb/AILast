@@ -416,6 +416,29 @@ def search_by_category_api(request):
     }, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+def search_by_category_api_without_limit(request):
+    category = request.GET.get('category', '').strip()
+
+    if not category:
+        return Response({
+            'error': 'Category is required',
+            'message': 'Please provide a category using the "category" parameter'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    tools = Tool.objects.filter(
+        is_approved=True,
+        category__icontains=category
+
+    ).order_by('-click_count', 'name')
+
+    serializer = ToolSerializer(tools, many=True)
+    return Response({
+        'category': category,
+        'total_results': len(serializer.data),
+        'results': serializer.data
+    }, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
 def similar_tools_search_limit(request):
     tag = request.GET.get('tag', '').strip()
 
