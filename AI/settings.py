@@ -131,7 +131,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://localhost:3000',  # For HTTPS local development
     'https://aitoolscover.com',
     'https://aitoolscover.vercel.app',
-    'https://ai-tools-backend-p3sk.onrender.com
+    'https://ai-tools-backend-p3sk.onrender.com'
 ]
 
 # Static files configuration
