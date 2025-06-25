@@ -118,6 +118,7 @@ ALLOWED_HOSTS = [
     'localhost', 
     '127.0.0.1', 
     'ailast-production.up.railway.app',
+    'ai-tools-backend-p3sk.onrender.com',
     '.railway.app',  # Allow all Railway subdomains
 ]
 
@@ -130,6 +131,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://localhost:3000',  # For HTTPS local development
     'https://aitoolscover.com',
     'https://aitoolscover.vercel.app',
+    'https://ai-tools-backend-p3sk.onrender.com
 ]
 
 # Static files configuration
