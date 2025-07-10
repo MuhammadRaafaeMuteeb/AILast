@@ -17,6 +17,19 @@ class Tool(models.Model):
     views = models.PositiveIntegerField(default=0)
     developer = models.CharField(max_length=255, blank=True, null=True)
     submitted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # ✨ New long-form content fields
+    overview = models.TextField(blank=True, null=True)
+    what_you_can_do_with = models.TextField(blank=True, null=True)
+    key_features = models.TextField(blank=True, null=True)
+    benefits = models.TextField(blank=True, null=True)
+    pricing_plans = models.TextField(blank=True, null=True)
+    tips_best_practices = models.TextField(blank=True, null=True)
+    faqs = models.TextField(blank=True, null=True)
+    final_take = models.TextField(blank=True, null=True)
+    pricing = models.TextField(blank=True, null=True)
+    rating = models.TextField(blank=True, null=True)
+    
     CATEGORY_CHOICES = [
     ('Business & Productivity', 'Business & Productivity'),
     ('Education & Knowledge', 'Education & Knowledge'),
