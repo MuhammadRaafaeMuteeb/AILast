@@ -263,38 +263,64 @@ def upload_cleaned_csv(request):
             reader = csv.DictReader(text_io)
             reader.fieldnames = [fn.strip().replace('\ufeff', '') for fn in reader.fieldnames]
 
+            # 📌 Mapping CSV column headers to Django model fields
+            FIELD_MAPPING = {
+                'Tool Name': 'name',
+                'Category': 'category',
+                'Tags': 'tags',
+                'Rating': 'rating',
+                'Pricing (Raw)': 'pricing',
+                'Overview': 'overview',
+                'What You Can Do With': 'what_you_can_do_with',
+                'Key Features': 'key_features',
+                'Benefits': 'benefits',
+                'Pricing Plans': 'pricing_plans',
+                'Tips & Best Practices': 'tips_best_practices',
+                'FAQs': 'faqs',
+                'Final Take': 'final_take',
+                'Tool URL': 'link',
+                '' : 'image_url',
+                '' : 'thumbnail_url' 
+            }
+
             success_count = 0
             default_logo = "https://ai.openbestof.com/images/tools/mistral-ai_icon.webp"
 
             for row in reader:
-                print("Row:", row)
-                name = row.get('name', '').strip()
-                link = row.get('link', '').strip()
-                description = row.get('description', '').strip()
-                logo_url = row.get('image_url', '').strip() or default_logo
-                thumbnail_url = row.get('thumbnail_url', '').strip() or default_logo
-                category = row.get('category', '')
-
-                print(f"Parsed: name={name}, link={link}, description={description}, logo={logo_url}, Category ={category}")
-
                 try:
+                    tool_data = {}
+                    for csv_field, model_field in FIELD_MAPPING.items():
+                        tool_data[model_field] = row.get(csv_field, '').strip()
+
                     Tool.objects.create(
-                        name=name,
-                        link=link,
-                        description=description,
-                        image_url=logo_url,
-                        category = category,
-                        thumbnail_url=thumbnail_url,
-                        is_approved=True
+                        name=tool_data['name'],
+                        link=tool_data['link'],
+                        tags=tool_data['tags'],
+                        rating=tool_data['rating'],
+                        pricing=tool_data['pricing'],
+                        overview=tool_data['overview'],
+                        what_you_can_do_with=tool_data['what_you_can_do_with'],
+                        key_features=tool_data['key_features'],
+                        benefits=tool_data['benefits'],
+                        pricing_plans=tool_data['pricing_plans'],
+                        tips_best_practices=tool_data['tips_best_practices'],
+                        faqs=tool_data['faqs'],
+                        final_take=tool_data['final_take'],
+                        category=tool_data['category'],
+                        description='',  # Optional, update if CSV has it
+                        image_url=default_logo,
+                        thumbnail_url=default_logo,
+                        is_approved=False
                     )
                     success_count += 1
+
                 except Exception as e:
-                    messages.warning(request, f"Error adding tool '{name}': {e}")
+                    messages.warning(request, f"⚠️ Error adding tool '{row.get('Tool Name', 'Unknown')}': {e}")
                     continue
 
-            messages.success(request, f"{success_count} tools imported successfully.")
+            messages.success(request, f"✅ {success_count} tools imported successfully.")
         except Exception as e:
-            messages.error(request, f"Failed to read file: {e}")
+            messages.error(request, f"❌ Failed to read file: {e}")
 
         return redirect('upload_cleaned_csv')
 
