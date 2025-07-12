@@ -22,7 +22,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from .authentication import JWTAuthentication
-
+from django.db.models import Q
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 import logging
