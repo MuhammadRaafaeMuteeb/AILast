@@ -428,10 +428,18 @@ def search_by_category_api(request):
             'message': 'Please provide a category using the "category" parameter'
         }, status=status.HTTP_400_BAD_REQUEST)
 
+    # Format the category for proper matching with the tag format
+    # For example, if category is "Writing & Editing", we should look for "#writing & editing#"
+    formatted_category = f"#{category.lower()}#"
+    
+    # Alternative approach to handle partial matches or categories within tags
     tools = Tool.objects.filter(
-        is_approved=True,
-        tags__icontains=category
-
+        is_approved=True
+    ).filter(
+        Q(tags__icontains=formatted_category) |  # Exact match with hashes
+        Q(tags__icontains=f"#{category.lower()}") |  # Match at the beginning
+        Q(tags__icontains=f"{category.lower()}#") |  # Match at the end
+        Q(category__iexact=category)  # Match category field directly
     ).order_by('-click_count', 'name')[offset:offset+limit]
 
     serializer = ToolSerializer(tools, many=True)
