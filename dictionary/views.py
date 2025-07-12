@@ -430,7 +430,7 @@ def search_by_category_api(request):
 
     tools = Tool.objects.filter(
         is_approved=True,
-        category__icontains=category
+        tags__icontains=category
 
     ).order_by('-click_count', 'name')[offset:offset+limit]
 
