@@ -310,7 +310,7 @@ def upload_cleaned_csv(request):
                         description='', 
                         image_url=tool_data['image_url'],
                         thumbnail_url=tool_data['thumbnail_url'],
-                        is_approved=False
+                        is_approved=True
                     )
                     success_count += 1
 
