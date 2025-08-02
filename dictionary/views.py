@@ -279,8 +279,8 @@ def upload_cleaned_csv(request):
                 'FAQs': 'faqs',
                 'Final Take': 'final_take',
                 'Tool URL': 'link',
-                '' : 'image_url',
-                '' : 'thumbnail_url' 
+                'Logo URL' : 'image_url',
+                'Thumbnail URL' : 'thumbnail_url' 
             }
 
             success_count = 0
@@ -307,9 +307,9 @@ def upload_cleaned_csv(request):
                         faqs=tool_data['faqs'],
                         final_take=tool_data['final_take'],
                         category=tool_data['category'],
-                        description='',  # Optional, update if CSV has it
-                        image_url=default_logo,
-                        thumbnail_url=default_logo,
+                        description='', 
+                        image_url=tool_data['image_url'],
+                        thumbnail_url=tool_data['thumbnail_url'],
                         is_approved=False
                     )
                     success_count += 1
