@@ -12,7 +12,7 @@ class Tool(models.Model):
     description = models.TextField(blank=True, null=True)
     tags = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    is_approved = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=True)
     click_count = models.PositiveIntegerField(default=0)
     views = models.PositiveIntegerField(default=0)
     developer = models.CharField(max_length=255, blank=True, null=True)
